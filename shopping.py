@@ -59,7 +59,72 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    evidence = []
+    labels = []
+    with open(filename) as file:
+        reader = csv.reader(file)
+        reader.__next__()
+        for row in reader:
+            formatted_row = row
+            # change months to integers
+            if row[10] == "Jan":
+                formatted_row[10] = 0
+            elif row[10] == "Feb":
+                formatted_row[10] = 1
+            elif row[10] == "Mar":
+                formatted_row[10] = 2
+            elif row[10] == "Apr":
+                formatted_row[10] = 3
+            elif row[10] == "May":
+                formatted_row[10] = 4
+            elif row[10] == "June":
+                formatted_row[10] = 5
+            elif row[10] == "Jul":
+                formatted_row[10] = 6
+            elif row[10] == "Aug":
+                formatted_row[10] = 7
+            elif row[10] == "Sep":
+                formatted_row[10] = 8
+            elif row[10] == "Oct":
+                formatted_row[10] = 9
+            elif row[10] == "Nov":
+                formatted_row[10] = 10
+            elif row[10] == "Dec":
+                formatted_row[10] = 11
+            
+            # Change visitor type, 1 for returning visitors 0 for non-returning
+            if row[15] == "Returning_Visitor":
+                formatted_row[15] = 1
+            else:
+                formatted_row[15] = 0
+            # Change weekend, 1 if weekend 0 otherwise
+            if row[16] == "True":
+                formatted_row[16] = 1
+            else:
+                formatted_row[16] = 0
+
+            # Value of label should be 1 if user went through with the purchase, 0 otherwise
+            if row[17] == "TRUE":
+                formatted_row[17] = 1
+
+            else:
+                formatted_row[17] = 0
+
+            # convert formatted row to floats/ints
+            for index in [1, 3, 5, 6, 7, 8, 9]:
+                formatted_row[index] = float(formatted_row[index])
+
+            for index in [0, 2, 4, 10, 11, 12, 13, 14, 15, 16]:
+                formatted_row[index] = int(formatted_row[index])
+
+            # Add the row to evidence and labels
+            evidence.append(formatted_row[:17])
+            labels.append(formatted_row[17])
+
+
+            
+    
+    return (evidence, labels)
 
 
 def train_model(evidence, labels):
@@ -67,7 +132,8 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
+    model = KNeighborsClassifier(n_neighbors=1)
+    return model.fit(evidence, labels)
 
 
 def evaluate(labels, predictions):
@@ -85,8 +151,25 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    num_positive_correct = 0
+    total_positive = 0
+    num_negative_correct = 0
+    total_negative = 0
 
+    for prediction, actual in zip(predictions, labels):
+        if actual == 1:
+            total_positive += 1
+            if prediction == actual:
+                num_positive_correct += 1
+        if actual == 0:
+            total_negative += 1
+            if prediction == actual:
+                num_negative_correct += 1
+
+    sensitivity = num_positive_correct / total_positive
+    specificity = num_negative_correct / total_negative
+    
+    return (sensitivity, specificity)
 
 if __name__ == "__main__":
     main()
